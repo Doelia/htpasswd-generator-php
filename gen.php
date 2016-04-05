@@ -3,7 +3,7 @@
 function getFolderList() {
     $tab = array();
     foreach (scandir(__DIR__) as $v) {
-        if (is_dir($v)) {
+        if (is_dir($v) && $v != '..') {
             $tab[] = $v;
         }
     }
@@ -11,21 +11,32 @@ function getFolderList() {
 }
 
 function setAccess($path, $login, $password) {
+    // htpasswd
+    $password = crypt($password, base64_encode($password));;
     $content = "$login:$password";
-    @mkdir($path);
     file_put_contents($path.'/.htpasswd', $content);
+
+    // htaccess
+    $content = "AuthUserFile ".$path.'/.htpasswd'."
+AuthGroupFile /dev/null
+AuthName \"Accès Restreint\"
+AuthType Basic
+require valid-user";
+
+    file_put_contents($path.'/.htaccess', $content);
 }
 
 function removeAccess($path) {
-    unlink($path.'/.htpasswd');
+    @unlink($path.'/.htpasswd');
+    @unlink($path.'/.htaccess');
 }
 
 function getLogin($path) {
     if (($content = @file_get_contents($path.'/.htpasswd')) !== FALSE) {
-        return $content;
+        $v = explode(':', $content);
+        return $v[0];
     }
     return false;
-
 }
 
 if (isset($_POST['add'])) {
@@ -37,40 +48,68 @@ if (isset($_POST['add'])) {
     }
 }
 
+if (isset($_GET['removeProtect'])) {
+    $d = __DIR__.'/'.$_GET['removeProtect'];
+    removeAccess($d);
+}
+
+if (isset($_POST['mkdir'])) {
+    $d = __DIR__.'/'.$_POST['path'];
+    @mkdir($d);
+}
+
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Bootstrap 101 Template</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
 
-  </head>
-  <body>
+</head>
+<body>
 
-      <div class="container">
-          <?php foreach (getFolderList() as $d): ?>
-              <form class="" action="" method="post">
-                  <input type="text" name="path" value="<?php $v = explode('/', $d); echo end($v); ?>">
-                  <input type="text" name="login" value="<?php echo getLogin($d); ?>">
-                  <input type="password" name="password" value="<?php echo ($v = getLogin($d)) ? '*******' : '' ; ?>">
-                  <input type="submit" name="add" value="Save">
-              </form>
-          <?php endforeach; ?>
-          Nouveau dossier :
-          <form class="" action="" method="post">
-              <input type="text" name="path" value="">
-              <input type="text" name="login" value="">
-              <input type="password" name="password" value="">
-              <input type="submit" name="add" value="Save">
-          </form>
-          Suppremier le login/pass pour retirer la protection
-      </div>
+    <div class="container">
+
+        <table class="table table-hover">
+            <?php foreach (getFolderList() as $d): ?>
+                <tr>
+                    <td>Repertoire <strong>/<?php echo $d; ?></strong></td>
+                    <td style="width: 70%">
+                    <?php if (isset($_GET['protect']) && $_GET['protect'] == $d) { ?>
+                        <form class="form-inline" action="<?php echo basename(__FILE__); ?>" method="post">
+                            <input type="hidden" name="path" value="<?php $v = explode('/', $d); echo end($v); ?>">
+                            <input type="text" placeholder="Login" name="login" class="form-control" value="<?php echo getLogin($d); ?>">
+                            <input type="password" placeholder="Mot de passe" name="password" class="form-control" value="<?php echo ($v = getLogin($d)) ? '*******' : '' ; ?>">
+                            <input type="submit" name="add" class="form-control" value="Protéger">
+                        </form>
+                    <?php } else { ?>
+                        <?php if (getLogin($d)) { ?>
+                            <a href="?removeProtect=<?php echo $d ?>" class="btn btn-danger">Retirer la protection</a>
+                        <?php } else { ?>
+                            <a href="?protect=<?php echo $d ?>" class="btn btn-success">Protéger</a>
+                        <?php } ?>
+                    <?php } ?>
+                    </td>
+                    <td>
+                        <a href="/<?php echo basename($d) ?>" class="btn btn-primary">Tester</a>
+                    </td>
+
+                </tr>
+            <?php endforeach; ?>
+        </table>
+        Créer un nouveau repertoire :
+        <form class="form-inline" action="<?php echo basename(__FILE__); ?>" method="post">
+            <input type="text" class="form-control" placeholder="Repertoire" name="path">
+            <input type="submit" name="mkdir" class="form-control" value="Créer">
+        </form>
+        Supprimer le login/pass pour retirer la protection
+    </div>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
-  </body>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+</body>
 </html>
