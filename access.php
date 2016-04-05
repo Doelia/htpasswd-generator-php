@@ -66,7 +66,7 @@ if (isset($_POST['mkdir'])) {
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Bootstrap 101 Template</title>
+    <title>Sécurisation</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
 
 </head>
@@ -74,7 +74,7 @@ if (isset($_POST['mkdir'])) {
 
     <div class="container">
 
-        <h2>Générateur de fichier htaccess/htpasswd dans une arborescence</h2>
+        <h2>Sécurisation de repertoire par login/pass</h2>
 
         <h3>Liste des répertoires</h3>
         <table class="table table-hover">
@@ -82,25 +82,24 @@ if (isset($_POST['mkdir'])) {
                 <tr>
                     <td>Repertoire <strong>/<?php echo $d; ?></strong></td>
                     <td style="width: 70%">
-                    <?php if (isset($_GET['protect']) && $_GET['protect'] == $d) { ?>
-                        <form class="form-inline" action="<?php echo basename(__FILE__); ?>" method="post">
-                            <input type="hidden" name="path" value="<?php $v = explode('/', $d); echo end($v); ?>">
-                            <input type="text" placeholder="Login" name="login" class="form-control" value="<?php echo getLogin($d); ?>">
-                            <input type="password" placeholder="Mot de passe" name="password" class="form-control" value="<?php echo ($v = getLogin($d)) ? '*******' : '' ; ?>">
-                            <input type="submit" name="add" class="form-control" value="Protéger">
-                        </form>
-                    <?php } else { ?>
-                        <?php if (getLogin($d)) { ?>
-                            <a href="?removeProtect=<?php echo $d ?>" class="btn btn-danger">Retirer la protection</a>
+                        <?php if (isset($_GET['protect']) && $_GET['protect'] == $d) { ?>
+                            <form class="form-inline" action="<?php echo basename(__FILE__); ?>" method="post">
+                                <input type="hidden" name="path" value="<?php $v = explode('/', $d); echo end($v); ?>">
+                                <input type="text" placeholder="Login" name="login" class="form-control" value="<?php echo getLogin($d); ?>">
+                                <input type="password" placeholder="Mot de passe" name="password" class="form-control" value="<?php echo ($v = getLogin($d)) ? '*******' : '' ; ?>">
+                                <input type="submit" name="add" class="form-control" value="Protéger">
+                            </form>
                         <?php } else { ?>
-                            <a href="?protect=<?php echo $d ?>" class="btn btn-success">Protéger</a>
+                            <?php if (getLogin($d)) { ?>
+                                <a href="?removeProtect=<?php echo $d ?>" class="btn btn-danger">Retirer la protection</a>
+                            <?php } else { ?>
+                                <a href="?protect=<?php echo $d ?>" class="btn btn-success">Protéger</a>
+                            <?php } ?>
                         <?php } ?>
-                    <?php } ?>
                     </td>
                     <td>
-                        <a href="/<?php echo basename($d) ?>" class="btn btn-primary">Tester</a>
+                        <a href="/<?php echo basename($d) ?>" class="btn btn-primary">Tester l'accès</a>
                     </td>
-
                 </tr>
             <?php endforeach; ?>
         </table>
