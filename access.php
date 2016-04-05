@@ -74,6 +74,9 @@ if (isset($_POST['mkdir'])) {
 
     <div class="container">
 
+        <h2>Générateur de fichier htaccess/htpasswd dans une arborescence</h2>
+
+        <h3>Liste des répertoires</h3>
         <table class="table table-hover">
             <?php foreach (getFolderList() as $d): ?>
                 <tr>
@@ -101,12 +104,11 @@ if (isset($_POST['mkdir'])) {
                 </tr>
             <?php endforeach; ?>
         </table>
-        Créer un nouveau repertoire :
+        <h3>Créer un nouveau repertoire</h3>
         <form class="form-inline" action="<?php echo basename(__FILE__); ?>" method="post">
             <input type="text" class="form-control" placeholder="Repertoire" name="path">
             <input type="submit" name="mkdir" class="form-control" value="Créer">
         </form>
-        Supprimer le login/pass pour retirer la protection
     </div>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
