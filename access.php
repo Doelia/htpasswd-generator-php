@@ -9,62 +9,68 @@
  *
  */
 
-function getFolderList() {
-    $tab = array();
-    foreach (scandir(__DIR__) as $v) {
-        if (is_dir($v) && $v != '..') {
-            $tab[] = $v;
-        }
+class Path {
+    public function __construct($f) {
+        $this->name = $f;
+        $this->path = $path = __DIR__.'/'.$f;
+        $this->htpasswd = $path.'/.htpasswd';
+        $this->htaccess = $path.'/.htaccess';
     }
-    return $tab;
-}
 
-function setAccess($path, $login, $password) {
-    // htpasswd
-    $password = crypt($password, base64_encode($password));;
-    $content = "$login:$password";
-    file_put_contents($path.'/.htpasswd', $content);
+    public function setAccess($login, $password) {
+        $password = crypt($password, base64_encode($password));
+        $content = "$login:$password";
+        file_put_contents($this->htpasswd, $content);
 
-    // htaccess
-    $content = "AuthUserFile ".$path.'/.htpasswd'."
+        // htaccess
+        $content = "AuthUserFile ".$this->htpasswd."
 AuthGroupFile /dev/null
 AuthName \"Accès Restreint\"
 AuthType Basic
 require valid-user";
 
-    file_put_contents($path.'/.htaccess', $content);
-}
-
-function removeAccess($path) {
-    @unlink($path.'/.htpasswd');
-    @unlink($path.'/.htaccess');
-}
-
-function getLogin($path) {
-    if (($content = @file_get_contents($path.'/.htpasswd')) !== FALSE) {
-        $v = explode(':', $content);
-        return $v[0];
+        file_put_contents($this->htaccess, $content);
     }
-    return false;
+
+    public static function getFolderList() {
+        $tab = array();
+        foreach (scandir(__DIR__) as $v) {
+            if (is_dir($v) && $v != '..') {
+                $tab[] = new Path(basename($v));
+            }
+        }
+        return $tab;
+    }
+
+    public function removeAccess() {
+        @unlink($this->htaccess);
+        @unlink($this->htpasswd);
+    }
+
+    public function isSecure() {
+        return @file_get_contents($this->htpasswd) !== FALSE;
+    }
+
+    public function mkdir() {
+        @mkdir($this->path);
+    }
 }
 
 if (isset($_POST['add'])) {
-    $d = __DIR__.'/'.$_POST['path'];
+    $d = new Path($_POST['path']);
     if ($_POST['login']) {
-        setAccess($d, $_POST['login'], $_POST['password']);
+        $d->setAccess($_POST['login'], $_POST['password']);
     } else {
-        removeAccess($d);
+        $d->removeAccess();
     }
 }
 
 if (isset($_GET['removeProtect'])) {
-    $d = __DIR__.'/'.$_GET['removeProtect'];
-    removeAccess($d);
+    (new Path($_GET['removeProtect']))->removeAccess();
 }
 
 if (isset($_POST['mkdir'])) {
-    $d = __DIR__.'/'.$_POST['path'];
-    @mkdir($d);
+    (new Path($_POST['path']))->mkdir();
 }
 
 ?>
@@ -87,27 +93,27 @@ if (isset($_POST['mkdir'])) {
 
         <h3>Liste des répertoires</h3>
         <table class="table table-hover">
-            <?php foreach (getFolderList() as $d): ?>
+            <?php foreach (Path::getFolderList() as $d): ?>
                 <tr>
-                    <td>Repertoire <strong>/<?php echo $d; ?></strong></td>
+                    <td>Repertoire <strong>/<?php echo $d->name; ?></strong></td>
                     <td style="width: 70%">
-                        <?php if (isset($_GET['protect']) && $_GET['protect'] == $d) { ?>
+                        <?php if (isset($_GET['protect']) && $_GET['protect'] == $d->name) { ?>
                             <form class="form-inline" action="<?php echo basename(__FILE__); ?>" method="post">
-                                <input type="hidden" name="path" value="<?php $v = explode('/', $d); echo end($v); ?>">
+                                <input type="hidden" name="path" value="<?php echo $d->name; ?>">
                                 <input type="text" placeholder="Login" name="login" class="form-control">
                                 <input type="password" placeholder="Mot de passe" name="password" class="form-control">
                                 <input type="submit" name="add" class="form-control" value="Protéger">
                             </form>
                         <?php } else { ?>
-                            <?php if (getLogin($d)) { ?>
-                                <a href="?removeProtect=<?php echo $d ?>" class="btn btn-danger">Retirer la protection</a>
+                            <?php if ($d->isSecure()) { ?>
+                                <a href="?removeProtect=<?php echo $d->name ?>" class="btn btn-danger">Retirer la protection</a>
                             <?php } else { ?>
-                                <a href="?protect=<?php echo $d ?>" class="btn btn-success">Protéger</a>
+                                <a href="?protect=<?php echo $d->name ?>" class="btn btn-success">Protéger</a>
                             <?php } ?>
                         <?php } ?>
                     </td>
                     <td>
-                        <a href="/<?php echo basename($d) ?>" class="btn btn-primary">Tester l'accès</a>
+                        <a href="/<?php echo $d->name; ?>" class="btn btn-primary">Tester l'accès</a>
                     </td>
                 </tr>
             <?php endforeach; ?>
