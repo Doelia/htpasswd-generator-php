@@ -83,7 +83,7 @@ if (isset($_POST['mkdir'])) {
 
     <div class="container">
 
-        <h2>Sécurisation de repertoire par login/pass</h2>
+        <h2>Sécurisation de répertoire par login/pass</h2>
 
         <h3>Liste des répertoires</h3>
         <table class="table table-hover">
@@ -94,8 +94,8 @@ if (isset($_POST['mkdir'])) {
                         <?php if (isset($_GET['protect']) && $_GET['protect'] == $d) { ?>
                             <form class="form-inline" action="<?php echo basename(__FILE__); ?>" method="post">
                                 <input type="hidden" name="path" value="<?php $v = explode('/', $d); echo end($v); ?>">
-                                <input type="text" placeholder="Login" name="login" class="form-control" value="<?php echo getLogin($d); ?>">
-                                <input type="password" placeholder="Mot de passe" name="password" class="form-control" value="<?php echo ($v = getLogin($d)) ? '*******' : '' ; ?>">
+                                <input type="text" placeholder="Login" name="login" class="form-control">
+                                <input type="password" placeholder="Mot de passe" name="password" class="form-control">
                                 <input type="submit" name="add" class="form-control" value="Protéger">
                             </form>
                         <?php } else { ?>
@@ -112,7 +112,7 @@ if (isset($_POST['mkdir'])) {
                 </tr>
             <?php endforeach; ?>
         </table>
-        <h3>Créer un nouveau repertoire</h3>
+        <h3>Créer un nouveau répertoire</h3>
         <form class="form-inline" action="<?php echo basename(__FILE__); ?>" method="post">
             <input type="text" class="form-control" placeholder="Repertoire" name="path">
             <input type="submit" name="mkdir" class="form-control" value="Créer">
