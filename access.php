@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * Générateur de htaccess/htpasswd pour sécuriser des repertoires
+ *
+ * @auhor Stéphane Wouters <doelia@doelia.fr>
+ * @date 5 Apr. 2016
+ * https://github.com/Doelia/htpasswd-generator-php
+ *
+ */
+
 function getFolderList() {
     $tab = array();
     foreach (scandir(__DIR__) as $v) {
