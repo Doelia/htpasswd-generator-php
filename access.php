@@ -19,27 +19,20 @@ class Path {
 
     public function setAccess($login, $password) {
         $password = crypt($password, base64_encode($password));
-        $content = "$login:$password";
-        file_put_contents($this->htpasswd, $content);
-
-        // htaccess
-        $content = "AuthUserFile ".$this->htpasswd."
+        file_put_contents($this->htpasswd, "$login:$password");
+        file_put_contents($this->htaccess, "AuthUserFile ".$this->htpasswd."
 AuthGroupFile /dev/null
 AuthName \"Accès Restreint\"
 AuthType Basic
-require valid-user";
-
-        file_put_contents($this->htaccess, $content);
+require valid-user");
     }
 
     public static function getFolderList() {
-        $tab = array();
-        foreach (scandir(__DIR__) as $v) {
-            if (is_dir($v) && $v != '..') {
-                $tab[] = new Path(basename($v));
-            }
-        }
-        return $tab;
+        return array_map( function($v) { return new Path(basename($v)); },
+            array_filter(scandir(__DIR__), function($v) {
+                return (is_dir($v) && $v != '..');
+            })
+        );
     }
 
     public function removeAccess() {
@@ -83,7 +76,6 @@ if (isset($_POST['mkdir'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Sécurisation</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
-
 </head>
 <body>
 
