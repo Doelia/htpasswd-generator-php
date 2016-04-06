@@ -105,19 +105,18 @@ if (isset($_POST['mkdir'])) {
                 <tr>
                     <td>
                         Repertoire <strong>/<?php echo $d->name; ?></strong>
-                        <br>
-                        <td>
-                            <?php if ($d->isSecure()) { ?>
-                                <span class="label label-danger">Protégé</span>
+                    </td>
+                    <td>
+                        <?php if ($d->isSecure()) { ?>
+                            <span class="label label-danger">Protégé</span>
+                        <?php } else { ?>
+                            <?php if ($d->isSecureByRecursive()) { ?>
+                                <span class="label label-warning">Protégé par récursivité</span>
                             <?php } else { ?>
-                                <?php if ($d->isSecureByRecursive()) { ?>
-                                    <span class="label label-warning">Protégé par récursivité</span>
-                                <?php } else { ?>
-                                    <span class="label label-success">Public</span>
-                                <?php } ?>
-
+                                <span class="label label-success">Public</span>
                             <?php } ?>
-                        </td>
+
+                        <?php } ?>
                     </td>
                     <td style="width: 60%">
                         <?php if (isset($_GET['protect']) && $_GET['protect'] == $d->name) { ?>
