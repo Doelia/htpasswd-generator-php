@@ -36,12 +36,18 @@ require valid-user");
     }
 
     public function isSecureByRecursive() {
-        return !file_exists($this->htaccess) && $this->name != ".";
+        return !file_exists($this->htaccess)
+            && $this->name != "."
+            && (new Path('.'))->isSecure();
+    }
+
+    public function setSecureByRecursivity() {
+        @unlink($this->htaccess);
+        @unlink($this->htpasswd);
     }
 
     public function removeAccess() {
-        @unlink($this->htaccess);
-        @unlink($this->htpasswd);
+        $this->setSecureByRecursivity();
         file_put_contents($this->htaccess, "Satisfy any");
     }
 
@@ -66,6 +72,10 @@ if (isset($_POST['add'])) {
 
 if (isset($_GET['removeProtect'])) {
     (new Path($_GET['removeProtect']))->removeAccess();
+}
+
+if (isset($_GET['setSecureByRecursivity'])) {
+    (new Path($_GET['setSecureByRecursivity']))->setSecureByRecursivity();
 }
 
 if (isset($_POST['mkdir'])) {
@@ -96,11 +106,20 @@ if (isset($_POST['mkdir'])) {
                     <td>
                         Repertoire <strong>/<?php echo $d->name; ?></strong>
                         <br>
-                        <?php if ($d->isSecureByRecursive()): ?>
-                            <span class="label label-warning">Protégé par récursivité</span>
-                        <?php endif; ?>
+                        <td>
+                            <?php if ($d->isSecure()) { ?>
+                                <span class="label label-danger">Protégé</span>
+                            <?php } else { ?>
+                                <?php if ($d->isSecureByRecursive()) { ?>
+                                    <span class="label label-warning">Protégé par récursivité</span>
+                                <?php } else { ?>
+                                    <span class="label label-success">Public</span>
+                                <?php } ?>
+
+                            <?php } ?>
+                        </td>
                     </td>
-                    <td style="width: 70%">
+                    <td style="width: 60%">
                         <?php if (isset($_GET['protect']) && $_GET['protect'] == $d->name) { ?>
                             <form class="form-inline" action="<?php echo basename(__FILE__); ?>" method="post">
                                 <input type="hidden" name="path" value="<?php echo $d->name; ?>">
@@ -112,8 +131,11 @@ if (isset($_POST['mkdir'])) {
                             <?php if ($d->isSecure()) { ?>
                                 <a href="?removeProtect=<?php echo $d->name ?>" class="btn btn-danger">Retirer la protection</a>
                             <?php } else { ?>
-                                <a href="?protect=<?php echo $d->name ?>" class="btn btn-success">Protéger</a>
-
+                                <?php if ($d->isSecureByRecursive()) { ?>
+                                    <a href="?removeProtect=<?php echo $d->name ?>" class="btn btn-warning">Retirer la protection par récursivité</a>
+                                <?php } else { ?>
+                                    <a href="?protect=<?php echo $d->name ?>" class="btn btn-success">Protéger</a>
+                                <?php } ?>
                             <?php } ?>
                         <?php } ?>
                     </td>
@@ -128,7 +150,14 @@ if (isset($_POST['mkdir'])) {
             <input type="text" class="form-control" placeholder="Repertoire" name="path">
             <input type="submit" name="mkdir" class="form-control" value="Créer">
         </form>
+
+        <h3 style="margin-top: 30px">Légende</h3>
+        <div>
+            <span class="label label-warning" style="margin-right: 5px">Protégé par récursivité</span> Indique que le répertoire est protégé avec le même mot de passe que le repertoire racine (./)
+        </div>
     </div>
+
+
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
