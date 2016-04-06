@@ -97,7 +97,7 @@ if (isset($_POST['mkdir'])) {
                         Repertoire <strong>/<?php echo $d->name; ?></strong>
                         <br>
                         <?php if ($d->isSecureByRecursive()): ?>
-                            <span class="label label-warning">Sécurisé par récursivité.</span>
+                            <span class="label label-warning">Protégé par récursivité</span>
                         <?php endif; ?>
                     </td>
                     <td style="width: 70%">
