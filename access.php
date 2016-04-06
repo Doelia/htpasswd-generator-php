@@ -36,8 +36,8 @@ require valid-user");
     }
 
     public function removeAccess() {
-        @unlink($this->htaccess);
-        @unlink($this->htpasswd);
+        unlink($this->htaccess);
+        unlink($this->htpasswd);
     }
 
     public function isSecure() {
@@ -45,7 +45,7 @@ require valid-user");
     }
 
     public function mkdir() {
-        @mkdir($this->path);
+        mkdir($this->path);
     }
 }
 
@@ -105,7 +105,7 @@ if (isset($_POST['mkdir'])) {
                         <?php } ?>
                     </td>
                     <td>
-                        <a href="/<?php echo $d->name; ?>" class="btn btn-primary">Tester l'accès</a>
+                        <a href="<?php echo $d->name; ?>" class="btn btn-primary">Tester l'accès</a>
                     </td>
                 </tr>
             <?php endforeach; ?>
