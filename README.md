@@ -3,7 +3,7 @@ Générateur de fichier htaccess/htpasswd dans une arborescence
 
 ## Utilisation
 - Copier `access.php` dans le dossier à protéger
-- L'ouvrir dans le navigateur et configurer vos accès
-- It's work!
+- Ouvrir l'url dans le navigateur et configurer des accès
+- C'est tout :)
 
 ![](http://i.imgur.com/GGRtpAX.png)
