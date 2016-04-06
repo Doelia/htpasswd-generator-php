@@ -28,16 +28,21 @@ require valid-user");
     }
 
     public static function getFolderList() {
-        return array_map( function($v) { return new Path(basename($v)); },
+        return array_map(function($v) { return new Path(basename($v)); },
             array_filter(scandir(__DIR__), function($v) {
                 return (is_dir($v) && $v != '..');
             })
         );
     }
 
+    public function isSecureByRecursive() {
+        return !file_exists($this->htaccess);
+    }
+
     public function removeAccess() {
-        unlink($this->htaccess);
-        unlink($this->htpasswd);
+        @unlink($this->htaccess);
+        @unlink($this->htpasswd);
+        file_put_contents($this->htaccess, "Satisfy any");
     }
 
     public function isSecure() {
@@ -46,6 +51,7 @@ require valid-user");
 
     public function mkdir() {
         mkdir($this->path);
+        $this->removeAccess();
     }
 }
 
@@ -87,7 +93,13 @@ if (isset($_POST['mkdir'])) {
         <table class="table table-hover">
             <?php foreach (Path::getFolderList() as $d): ?>
                 <tr>
-                    <td>Repertoire <strong>/<?php echo $d->name; ?></strong></td>
+                    <td>
+                        Repertoire <strong>/<?php echo $d->name; ?></strong>
+                        <br>
+                        <?php if ($d->isSecureByRecursive()): ?>
+                            <span class="label label-warning">Sécurisé par récursivité.</span>
+                        <?php endif; ?>
+                    </td>
                     <td style="width: 70%">
                         <?php if (isset($_GET['protect']) && $_GET['protect'] == $d->name) { ?>
                             <form class="form-inline" action="<?php echo basename(__FILE__); ?>" method="post">
@@ -101,6 +113,7 @@ if (isset($_POST['mkdir'])) {
                                 <a href="?removeProtect=<?php echo $d->name ?>" class="btn btn-danger">Retirer la protection</a>
                             <?php } else { ?>
                                 <a href="?protect=<?php echo $d->name ?>" class="btn btn-success">Protéger</a>
+
                             <?php } ?>
                         <?php } ?>
                     </td>
