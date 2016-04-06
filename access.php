@@ -36,7 +36,7 @@ require valid-user");
     }
 
     public function isSecureByRecursive() {
-        return !file_exists($this->htaccess);
+        return !file_exists($this->htaccess) && $this->name != ".";
     }
 
     public function removeAccess() {
