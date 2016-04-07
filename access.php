@@ -115,7 +115,6 @@ if (isset($_POST['mkdir'])) {
                             <?php } else { ?>
                                 <span class="label label-success">Public</span>
                             <?php } ?>
-
                         <?php } ?>
                     </td>
                     <td style="width: 60%">
@@ -144,6 +143,7 @@ if (isset($_POST['mkdir'])) {
                 </tr>
             <?php endforeach; ?>
         </table>
+
         <h3>Créer un nouveau répertoire</h3>
         <form class="form-inline" action="<?php echo basename(__FILE__); ?>" method="post">
             <input type="text" class="form-control" placeholder="Repertoire" name="path">
@@ -155,8 +155,6 @@ if (isset($_POST['mkdir'])) {
             <span class="label label-warning" style="margin-right: 5px">Protégé par récursivité</span> Indique que le répertoire est protégé avec le même mot de passe que le repertoire racine (./)
         </div>
     </div>
-
-
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
